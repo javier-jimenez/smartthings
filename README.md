@@ -24,7 +24,7 @@ This repository contains device handler and smart-app for Ring Alarm integration
  - Select  **My Device Handlers**
  - Click on the **+ New Device Handler** button on the right.
  - On the **New Device Handler** page, Select the Tab **From Code**
-  - Copy the [ringalarm.groovy](devicetypes/javierj/RingAlarmWithSensors.groovy) source code and paste it into the IDE editor window - edit as shown below for devices/counts.
+  - Copy the [RingAlarmWithSensors.groovy](devicetypes/javierj/RingAlarmWithSensors.groovy) source code and paste it into the IDE editor window - edit as shown below for devices/counts.
   - Click the **Create** button at the bottom.
   - Click the blue **Save** button above the editor window.
   - Click the **Publish** button next to it and select **For Me**. You have now self-published your Device Handler
