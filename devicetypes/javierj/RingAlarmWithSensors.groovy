@@ -78,14 +78,15 @@ metadata {
 
         // Base Station
         standardTile("ringbase", "device.ringbase", label: "Base Station", decoration: "flat", width: 6, height: 1) {
-                state("unknown", label: '${name}', icon: "st.unknown.unknown.unknown", backgroundColor: "#505050")
-                state("online", label: '${name}',icon: "st.security.alarm.clear", backgroundColor: "#ffffff")
-                state("offline", label: '${name}', icon: "st.alarm.alarm.alarm", backgroundColor: "#00a0dc")   
+            state("unknown", label: '${name}', icon: "st.unknown.unknown.unknown", backgroundColor: "#505050")
+            state("online", label: '${name}',icon: "st.security.alarm.clear", backgroundColor: "#ffffff")
+            state("offline", label: '${name}', icon: "st.alarm.alarm.alarm", backgroundColor: "#00a0dc")   
         }
         
         //Define number of devices here:
         def motionSensorCount = 5
         def contactSensorCount = 11
+        def floodFreezeSensorCount = 1
         def rangeExtenderCount = 1
         def keypadCount = 1
         
@@ -97,6 +98,11 @@ metadata {
         // Contact Sensors
         (1..contactSensorCount).each { n ->	
             childDeviceTile("contact", "Contact-$n", width: 2, height: 2) 
+        }
+        
+        // Flood/Freeze Sensors
+        (1..floodFreezeSensorCount).each { n ->	
+            childDeviceTile("water", "Flood-freeze-$n", width: 2, height: 2) 
         }
 
         // Range Extender
@@ -124,10 +130,7 @@ metadata {
         }
 
         main(["status"])
-        
-
     }
-	
 }
 
 def installed() {
@@ -165,6 +168,7 @@ def createSensors() {
 
     def contactCount = 0
     def motionCount = 0
+    def floodCount = 0
 
     for (device in status.data.deviceStatus) {
         switch (device.type) {
@@ -175,10 +179,14 @@ def createSensors() {
             case 'sensor.motion' :
                 addSensor("Motion", ++motionCount, device.name)
                 break   
+                
+            case 'sensor.flood-freeze' :
+                addSensor("Flood-freeze", ++floodCount, device.name)
+                break   
         }
     }
     
-    log.debug "Added [contactSensors - ${contactCount}], [motionSensors - ${motionCount}]"
+    log.debug "Added [contactSensors - ${contactCount}], [motionSensors - ${motionCount}], [floodFreezeSensors - ${floodCount}]"
 }
 
 def addSensor(type, id, label) {
@@ -352,6 +360,7 @@ def poll() {
 
     def contactCount = 0
     def motionCount = 0
+    def floodFreezeCount = 0
     def keypadCount = 0
     def rangeExtenderCount = 0
     def alarmNetworkId = device.deviceNetworkId
@@ -377,6 +386,15 @@ def poll() {
                     contactSensor.sendEvent(name: "contact", value: "open", isStateChange: true, descriptionText: "${device.name} is Open")
                 else
                     contactSensor.sendEvent(name: "contact", value: "closed", isStateChange: true, descriptionText: "${device.name} is Closed")
+                break
+            case 'sensor.flood-freeze' :
+                def deviceId = "${alarmNetworkId}-Flood-freeze-${++floodFreezeCount}";
+                def floodFreezeSensor = childSensors?.find { it.deviceNetworkId == deviceId}
+
+                if (device.faulted) 
+                	floodFreezeSensor.sendEvent(name: "water", value: "wet", isStateChange: true, descriptionText: "${device.name} is Wet")
+                else
+                    floodFreezeSensor.sendEvent(name: "water", value: "dry", isStateChange: true, descriptionText: "${device.name} is Dry")
                 break
             case 'range-extender.zwave' :
                 if (device.faulted) 
