@@ -14,12 +14,12 @@
  */
  
 preferences {
-	input(name: "username", type: "text", title: "Username", required: "true", description: "Ring Alarm Username")
-	input(name: "password", type: "password", title: "Password", required: "true", description: "Ring Alarm Password")
-	input(name: "apiurl", type: "text", title: "API Url", required: "true", description: "Ring Alarm AWS API URL")
-	input(name: "apikey", type: "text", title: "API Key", required: "true", description: "Ring Alarm API Api Key")
-	input(name: "locationId", type: "text", title: "Location Id", required: "false", description: "Ring Alarm Location Id")
-	input(name: "zid", type: "text", title: "ZID", required: "false", description: "Ring Alarm ZID")
+    input(name: "username", type: "text", title: "Username", required: "true", description: "Ring Alarm Username")
+    input(name: "password", type: "password", title: "Password", required: "true", description: "Ring Alarm Password")
+    input(name: "apiurl", type: "text", title: "API Url", required: "true", description: "Ring Alarm AWS API URL")
+    input(name: "apikey", type: "text", title: "API Key", required: "true", description: "Ring Alarm API Api Key")
+    input(name: "locationId", type: "text", title: "Location Id", required: "false", description: "Ring Alarm Location Id")
+    input(name: "zid", type: "text", title: "ZID", required: "false", description: "Ring Alarm ZID")
     input(name: "pollInterval", type: "enum", title: "Polling Interval", required: "true", options: ["1 minute", "5 minutes", "10 minutes", "15 minutes"], defaultValue: "5")
 }
 
