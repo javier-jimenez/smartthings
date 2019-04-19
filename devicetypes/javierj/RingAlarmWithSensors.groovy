@@ -27,7 +27,7 @@ metadata {
 	definition (name: "Ring Alarm With Sensors", namespace: "javierj", author: "Javier Jimenez", cstHandler: true) {
 		capability "Alarm"
 		capability "Polling"
-        capability "Contact Sensor"
+		capability "Contact Sensor"
 		command "off"
 		command "home"
 		command "away"
@@ -35,7 +35,7 @@ metadata {
 		attribute "events", "string"
 		attribute "messages", "string"
 		attribute "status", "string"
-        singleInstance: true
+		singleInstance: true
 	}
 
 	tiles(scale: 2) {
