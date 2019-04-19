@@ -28,14 +28,15 @@ This repository contains device handler and smart-app for Ring Alarm integration
   - Click the **Create** button at the bottom.
   - Click the blue **Save** button above the editor window.
   - Click the **Publish** button next to it and select **For Me**. You have now self-published your Device Handler
-  - Repeat the same steps (Add new device handlers) for the [Ring contact sensor](devicetypes/javierj/RingContactSensor.groovy) and the [Ring motion sensor](devicetypes/javierj/RingMotionSensor.groovy).
+  - Repeat the same steps (Add new device handlers) for the [Ring contact sensor](devicetypes/javierj/RingContactSensor.groovy), [Ring motion sensor](devicetypes/javierj/RingMotionSensor.groovy) and [Ring flood/freeze sensor](devicetypes/javierj/RingFloodFreezeSensor.groovy).
 
 :pencil2: Update the number of ring devices in the code, check for below part.
 
 ```
-//Define number of devices here.
+//Define number of devices here:
 def motionSensorCount = 5
-def contactSensorCount = 6
+def contactSensorCount = 11
+def floodFreezeSensorCount = 1
 def rangeExtenderCount = 1
 def keypadCount = 1
 ```
@@ -44,7 +45,7 @@ def keypadCount = 1
   - Select **My Devices**
   - Click on the **+ New Device** button on the right.
   - Fill the Name and Network ID Field (can be anything you like)
-  - Under Type, select RingAlarm
+  - Under Type, select "Ring Alarm With Sensors"
   - Select appropriate options under Location and Hub
   - Click **Create**
   - Click **Preferences (edit)** 
