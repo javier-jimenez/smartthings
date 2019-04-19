@@ -11,11 +11,12 @@ This repository contains device handler and smart-app for Ring Alarm integration
 
 ## Supported Ring Devices
 
-- Alarm Base
+- Alarm base
 - Keypad
-- Motion Sensor
-- Contact Sensor
-- Z-Wave Range Extender 
+- Motion sensor
+- Contact sensor
+- Flood/freeze sensor
+- Z-Wave range extender 
 
 
 ### Manual Install SmartThings Device Handler
