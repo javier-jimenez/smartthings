@@ -27,7 +27,6 @@ metadata {
 	definition (name: "Ring Alarm With Sensors", namespace: "javierj", author: "Javier Jimenez", cstHandler: true) {
 		capability "Alarm"
 		capability "Polling"
-		capability "Contact Sensor"
 		command "off"
 		command "home"
 		command "away"
