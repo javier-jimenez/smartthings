@@ -14,12 +14,12 @@
  */
  
 preferences {
-    input(name: "username", type: "text", title: "Username", required: "true", description: "Ring Alarm Username")
-    input(name: "password", type: "password", title: "Password", required: "true", description: "Ring Alarm Password")
-    input(name: "apiurl", type: "text", title: "API Url", required: "true", description: "Ring Alarm AWS API URL")
-    input(name: "apikey", type: "text", title: "API Key", required: "true", description: "Ring Alarm API Api Key")
-    input(name: "locationId", type: "text", title: "Location Id", required: "false", description: "Ring Alarm Location Id")
-    input(name: "zid", type: "text", title: "ZID", required: "false", description: "Ring Alarm ZID")
+	input(name: "username", type: "text", title: "Username", required: "true", description: "Ring Alarm Username")
+	input(name: "password", type: "password", title: "Password", required: "true", description: "Ring Alarm Password")
+	input(name: "apiurl", type: "text", title: "API Url", required: "true", description: "Ring Alarm AWS API URL")
+	input(name: "apikey", type: "text", title: "API Key", required: "true", description: "Ring Alarm API Api Key")
+	input(name: "locationId", type: "text", title: "Location Id", required: "false", description: "Ring Alarm Location Id")
+	input(name: "zid", type: "text", title: "ZID", required: "false", description: "Ring Alarm ZID")
     input(name: "pollInterval", type: "enum", title: "Polling Interval", required: "true", options: ["1 minute", "5 minutes", "10 minutes", "15 minutes"], defaultValue: "5")
 }
 
@@ -34,7 +34,7 @@ metadata {
 		attribute "events", "string"
 		attribute "messages", "string"
 		attribute "status", "string"
-		singleInstance: true
+        singleInstance: true
 	}
 
 	tiles(scale: 2) {
@@ -77,14 +77,14 @@ metadata {
 
         // Base Station
         standardTile("ringbase", "device.ringbase", label: "Base Station", decoration: "flat", width: 6, height: 1) {
-            state("unknown", label: '${name}', icon: "st.unknown.unknown.unknown", backgroundColor: "#505050")
-            state("online", label: '${name}',icon: "st.security.alarm.clear", backgroundColor: "#ffffff")
-            state("offline", label: '${name}', icon: "st.alarm.alarm.alarm", backgroundColor: "#00a0dc")   
+                state("unknown", label: '${name}', icon: "st.unknown.unknown.unknown", backgroundColor: "#505050")
+                state("online", label: '${name}',icon: "st.security.alarm.clear", backgroundColor: "#ffffff")
+                state("offline", label: '${name}', icon: "st.alarm.alarm.alarm", backgroundColor: "#00a0dc")   
         }
         
         //Define number of devices here:
-        def motionSensorCount = 5
-        def contactSensorCount = 11
+        def motionSensorCount = 7
+        def contactSensorCount = 14
         def floodFreezeSensorCount = 1
         def rangeExtenderCount = 1
         def keypadCount = 1
@@ -139,9 +139,23 @@ def installed() {
 
 def updated() {
     unschedule()
-    removeChildDevices(getChildDevices())
-    createSensors()
- 	init()
+    def originalChildDevices = getChildDevices()
+    def addedChildren = createSensors()
+    // Remove devices that are no longer needed (assumes device order hasn't changed)
+    def noLongerNeededDevices = deduct(originalChildDevices, addedChildren)
+    removeChildDevices(noLongerNeededDevices)
+    // Now start polling
+    init()
+}
+
+def deduct(originalChildDevices, addedChildren) {
+	// TODO: Maybe a groovier way to do this?
+	def result = originalChildDevices.clone()
+	addedChildren.each { toRemove -> 
+    	result.removeAll { it.deviceNetworkId == toRemove.deviceNetworkId }
+    }
+
+    return result
 }
 
 def uninstalled() {
@@ -149,8 +163,14 @@ def uninstalled() {
 }
 
 def removeChildDevices(delete) {
+	log.info "Deleting devices: ${delete}"
     delete.each {
-        deleteChildDevice(it.deviceNetworkId)
+    	log.info "Trying to delete device ${it.deviceNetworkId}"
+        try {
+        	deleteChildDevice(it.deviceNetworkId)
+        } catch (Exception failedDeletingException) {
+        	log.error "Error deleting device {$it.deviceNetworkId}, remove usages and try updating preferences later. - ${failedDeletingException}"
+        }
     }
 }
 
@@ -168,52 +188,71 @@ def createSensors() {
     def contactCount = 0
     def motionCount = 0
     def floodCount = 0
+    
+    def addedChildren = []
 
     for (device in status.data.deviceStatus) {
         switch (device.type) {
             case 'sensor.contact' :
-                addSensor("Contact", ++contactCount, device.name)
+                addedChildren.add(addSensor("Contact", ++contactCount, device.name))
             	break
            
             case 'sensor.motion' :
-                addSensor("Motion", ++motionCount, device.name)
+                addedChildren.add(addSensor("Motion", ++motionCount, device.name))
                 break   
                 
             case 'sensor.flood-freeze' :
-                addSensor("Flood-freeze", ++floodCount, device.name)
+                addedChildren.add(addSensor("Flood-freeze", ++floodCount, device.name))
                 break   
         }
     }
     
     log.debug "Added [contactSensors - ${contactCount}], [motionSensors - ${motionCount}], [floodFreezeSensors - ${floodCount}]"
+    
+    return addedChildren
 }
 
 def addSensor(type, id, label) {
-	log.info "Adding sensor ${device.deviceNetworkId}-${type}-${id}"
+
+	def deviceId = "${device.deviceNetworkId}-${type}-${id}";
     
-    addChildDevice("Ring ${type} Sensor", 
-                   "${device.deviceNetworkId}-${type}-${id}", 
-                   null,
-                   [completedSetup: true, 
-                   	label: "${label} #${id}", 
-                    isComponent: true,
-                    componentName: "${type}-${id}", 
-                    componentLabel: "${label}"])
+	def currentChildren = getChildDevices()
+    def alreadyExistingChild = currentChildren?.find { it.deviceNetworkId == deviceId}
+
+    if (alreadyExistingChild) {
+    	log.debug "Sensor ${deviceId} already exists, not adding it again."
+        return alreadyExistingChild
+    } else {
+        log.debug "Adding sensor ${device.deviceNetworkId}-${type}-${id}"
+
+        return addChildDevice("Ring ${type} Sensor", 
+                              "${device.deviceNetworkId}-${type}-${id}", 
+                              null,
+                              [completedSetup: true, 
+                              label: "${label} #${id}", 
+                              isComponent: true,
+                              componentName: "${type}-${id}", 
+                              componentLabel: "${label}"])
+	}
 }
 
 def init() {
 	log.info "Setting up Schedule (every ${settings.pollInterval})..."
     switch(settings.pollInterval) {
-    	case "1 minute" : 
+    	case "1 minute" :
+           // runIn(60, poll)
         	runEvery1Minute(poll)
             break
         case "5 minutes" :
+        	//runIn(60*5, poll)
         	runEvery5Minutes(poll)
             break
         case "10 minutes" :
+           // runIn(60*10, poll)
         	runEvery10Minutes(poll)
             break
         case "15 minutes" :
+           //	runIn(60*15, poll)
         	runEvery15Minutes(poll)
             break
      	default:
