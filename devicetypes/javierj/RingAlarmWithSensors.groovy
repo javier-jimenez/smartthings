@@ -91,17 +91,17 @@ metadata {
         
         //Motion Sensors
         (1..motionSensorCount).each { n ->	
-            childDeviceTile("motion", "Motion-$n", width: 2, height: 2)
+            childDeviceTile("motion-$n", "Motion-$n", width: 2, height: 2)
         }
 
         // Contact Sensors
         (1..contactSensorCount).each { n ->	
-            childDeviceTile("contact", "Contact-$n", width: 2, height: 2) 
+            childDeviceTile("contact-$n", "Contact-$n", width: 2, height: 2) 
         }
         
         // Flood/Freeze Sensors
         (1..floodFreezeSensorCount).each { n ->	
-            childDeviceTile("water", "Flood-freeze-$n", width: 2, height: 2) 
+            childDeviceTile("water-$n", "Flood-freeze-$n", width: 2, height: 2) 
         }
 
         // Range Extender
