@@ -1,5 +1,7 @@
 # SmartThings - Ring Alarm Device & Smart-App
 
+:mega: **DEPRECATED:** All features from this fork have been merged back to the original repository: https://github.com/asishrs/smartthings
+
 > :mega: This is a fork of https://github.com/asishrs/smartthings adding support for sensors as "Things" that can be used in automation tasks.
 
 This repository contains device handler and smart-app for Ring Alarm integration with SmartThings. In order to use this, you need to deploy the API part as described [here](https://github.com/asishrs/smartthings-ringalarmv2 ).
