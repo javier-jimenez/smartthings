@@ -2,6 +2,7 @@
  *  Ring Alarm
  *
  *  Copyright 2019 Javier Jimenez
+ *  https://github.com/javier-jm/smartthings
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -83,9 +84,9 @@ metadata {
         }
         
         //Define number of devices here:
-        def motionSensorCount = 7
-        def contactSensorCount = 14
-        def floodFreezeSensorCount = 1
+        def motionSensorCount = 1
+        def contactSensorCount = 7
+        def floodFreezeSensorCount = 0
         def rangeExtenderCount = 1
         def keypadCount = 1
         
@@ -419,11 +420,23 @@ def poll() {
             case 'sensor.contact' :
             	def deviceId = "${alarmNetworkId}-Contact-${++contactCount}";
             	def contactSensor = childSensors?.find { it.deviceNetworkId == deviceId}
-
-                if (device.faulted) 
-                    contactSensor.sendEvent(name: "contact", value: "open", isStateChange: true, descriptionText: "${device.name} is Open")
-                else
+                def currState = contactSensor.currentState("contact")
+				log.debug "${device.name} value: ${contactSensor.currentContact}" 
+				def currStateValue = contactSensor.currentContact
+                
+                if (device.faulted) {
+                    if (currStateValue=="closed") {
+                    	contactSensor.sendEvent(name: "contact", value: "open", isStateChange: true, descriptionText: "${device.name} is Open");
+                    } else
+                    	log.debug "${device.name} not changed";
+                    }
+                else {
+                    if (currStateValue=="open") {
                     contactSensor.sendEvent(name: "contact", value: "closed", isStateChange: true, descriptionText: "${device.name} is Closed")
+                    } else
+                    	log.debug "${device.name} not changed";
+                    }
+                
                 break
             case 'sensor.flood-freeze' :
                 def deviceId = "${alarmNetworkId}-Flood-freeze-${++floodFreezeCount}";
